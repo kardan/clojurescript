@@ -1092,20 +1092,24 @@
   (-pr-writer [o writer _] (-write writer str)))
 
 (defn symbol
-  "Returns a Symbol with the given namespace and name."
+  "Returns a Symbol with the given namespace and name. Arity-1 works
+   on strings, keywords, and vars."
   ([name]
-   (if (symbol? name)
-     name
-     (let [idx (.indexOf name "/")]
-       (if (< idx 1)
-         (symbol nil name)
-         (symbol (.substring name 0 idx)
-                 (.substring name (inc idx) (. name -length)))))))
+   (cond
+     (symbol? name) name
+     (string? name) (let [idx (.indexOf name "/")]
+                      (if (< idx 1)
+                        (symbol nil name)
+                        (symbol (.substring name 0 idx)
+                                (.substring name (inc idx) (. name -length)))))
+     (keyword? name) (recur (.-fqn name))
+     (var? name) (.-sym name)
+     :else (throw (js/Error. (str name "no conversion to symbol")))))
   ([ns name]
-   (let [sym-str (if-not (nil? ns)
-                   (str ns "/" name)
-                   name)]
-     (Symbol. ns name sym-str nil nil))))
+    (let [sym-str (if-not (nil? ns)
+                    (str ns "/" name)
+                    name)]
+      (Symbol. ns name sym-str nil nil))))
 
 (deftype Var [val sym _meta]
   Object

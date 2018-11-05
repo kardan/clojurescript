@@ -1650,3 +1650,11 @@
     (is (= m4 (merge-with + (sorted m1) (sorted m2) m3)))
     (is (= m4 (merge-with + m1 (sorted m2) m3)))
     (is (= m4 (merge-with + m1 (sorted m2) (sorted m3))))))
+
+(deftest test-cljs-12303
+  (is (= (symbol 'symbol) 'symbol))
+  (is (= (symbol "string") 'string))
+  (is (= (symbol :foo) 'foo))
+  (is (= (symbol (->Var 0 'foo nil)) 'foo))
+  (is (= (symbol :foo/bar) 'foo/bar))
+  (is (thrown? js/Error (symbol 1))))
